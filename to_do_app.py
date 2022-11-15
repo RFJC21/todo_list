@@ -1,3 +1,5 @@
+# elif -> when 1 condition is meet, the program doesn't execute the rest
+
 coment='''todo1 = input(user_prompt)
 todo2 = input(user_prompt)
 todo3 = input(user_prompt)
@@ -26,90 +28,91 @@ while True:
     # remove possible white spaces
     user_action = user_action.strip()
 
-    match user_action:
-        case 'add':
-            todo = input('Insert a to do: ') + '\n'
+    if 'add' in user_action or 'new' in user_action:
+        todo = user_action[4:] #get string after the "add"
 
-            # read the existint entries on the txt file
-            # way 1
-            comment='''file = open('files/todos.csv', 'r')
+        # read the existint entries on the txt file
+        # way 1
+        comment='''file = open('files/todos.csv', 'r')
 
-            #create list with entries from the text file
+        #create list with entries from the text file
+        todos = file.readlines()
+        file.close()'''
+
+        # way 2: we don't need to close the file
+        with open('files/todos.csv', 'r') as file:
             todos = file.readlines()
-            file.close()'''
 
-            # way 2: we don't need to close the file
-            with open('files/todos.csv', 'r') as file:
-                todos = file.readlines()
+        # add entry to list
+        todo = todo.title()
+        todos.append(todo)
 
-            # add entry to list
-            todo = todo.title()
-            todos.append(todo)
+        # write to file
+        # way 1
+        comment='''file = open('files/todos.csv', 'w')
+        file.writelines(todos)
+        file.close()'''
 
-            # write to file
-            # way 1
-            comment='''file = open('files/todos.csv', 'w')
+        # way 2: we don't need to close the file
+        with open('files/todos.csv', 'w') as file:
             file.writelines(todos)
-            file.close()'''
 
-            # way 2: we don't need to close the file
-            with open('files/todos.csv', 'w') as file:
-                file.writelines(todos)
+    elif 'show' in user_action: # | means or and elif means if add is used, the programs doesn't look at this line
+        # read the existint entries on the txt file
 
-        case 'show' | 'display': # | means or
-            # read the existint entries on the txt file
+        file = open('files/todos.csv', 'r')
+        todos = file.readlines()
+        file.close()
 
-            file = open('files/todos.csv', 'r')
+        # ways to remove \n
+        commeent='''new_todos = []
+        for item in todos:
+            item = item.replace('\n', '')
+            new_todos.append(item)
+
+        # or new_todos = [item.strip('\n') for item in todos] '''
+
+        # show todos
+        for index, item in enumerate(todos): # to indicate the to do index
+            item = item.strip('\n') # remove the '\n'
+            row = f'{index + 1}-{item}'
+            print(row)
+
+    elif 'edit' in user_action:
+        #number = int(input('Number of the entry to edit: ')) # qsk the user which to do to edit
+        number = int(user_action[5:])
+        new_todo = input('Write the replace todo: ')
+
+        with open('files/todos.csv', 'r') as file:
             todos = file.readlines()
-            file.close()
 
-            # ways to remove \n
-            commeent='''new_todos = []
-            for item in todos:
-                item = item.replace('\n', '')
-                new_todos.append(item)
+        number = number - 1
+        todos[number] = new_todo.capitalize() + '\n'
 
-            # or new_todos = [item.strip('\n') for item in todos] '''
+        with open('files/todos.csv', 'w') as file:
+            file.writelines(todos)
 
-            # show todos
-            for index, item in enumerate(todos): # to indicate the to do index
-                item = item.strip('\n') # remove the '\n'
-                row = f'{index + 1}-{item}'
-                print(row)
+    elif 'complete' in user_action:
+        #number = int(input('Number of the entry to mark as completed: '))
+        number = int(user_action[9:])
 
-        case 'edit':
-            number = int(input('Number of the entry to edit: ')) # qsk the user which to do to edit
-            new_todo = input('Write the replace todo: ')
+        with open('files/todos.csv', 'r') as file:
+            todos = file.readlines()
 
-            with open('files/todos.csv', 'r') as file:
-                todos = file.readlines()
+        todo_to_remove = todos[number - 1]
 
-            number = number - 1
-            todos[number] = new_todo.capitalize() + '\n'
+        todos.pop(number - 1)
 
-            with open('files/todos.csv', 'w') as file:
-                file.writelines(todos)
+        with open('files/todos.csv', 'w') as file:
+            file.writelines(todos)
 
-        case 'complete':
-            number = int(input('Number of the entry to mark as completed: '))
+        message = f'The todo removed was: {todo_to_remove}'
+        print(message)
 
-            with open('files/todos.csv', 'r') as file:
-                todos = file.readlines()
+    elif 'exit' in user_action:
+        break
 
-            todo_to_remove = todos[number - 1]
-
-            todos.pop(number - 1)
-
-            with open('files/todos.csv', 'w') as file:
-                file.writelines(todos)
-
-            message = f'The todo removed was: {todo_to_remove}'
-            print(message)
-
-        case 'exit':
-            break
-
-        case _: # _ means anything else
-            print('Please write something correct...')
+    else:
+        print('Command is not valid')
 
 print('end of program!')
