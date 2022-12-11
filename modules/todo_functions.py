@@ -1,4 +1,4 @@
-FILEPATH = 'files/todos.csv'
+FILEPATH = '../files/todos.csv'
 
 
 # function to get todos
